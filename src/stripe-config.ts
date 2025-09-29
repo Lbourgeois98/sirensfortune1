@@ -8,6 +8,7 @@ export interface Product {
   rarity: 'Common' | 'Rare' | 'Epic' | 'Legendary';
   icon: string;
   mode: 'payment';
+  cryptoEnabled?: boolean;
 }
 
 export const products: Product[] = [
@@ -20,7 +21,8 @@ export const products: Product[] = [
     productId: 'prod_T8zCNDHY8xOTyT',
     rarity: 'Common',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfMHk0S0JDcmNiV3N6UEpKR3U3elNlTEI500pNHqCv3Y',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
   },
   {
     id: 'coral',
@@ -31,7 +33,8 @@ export const products: Product[] = [
     productId: 'prod_T8zCRuXvQlvB8R',
     rarity: 'Common',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfMVgxS01GT3pGeGUwMmxDdzlibmJ5WWJP00DqCg2Mz6',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
   },
   {
     id: 'sand-dollars',
@@ -42,7 +45,8 @@ export const products: Product[] = [
     productId: 'prod_T8zDXHKUi0q7pk',
     rarity: 'Rare',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfc3BuZWNrY2RWeVNmNDBiMU5YT3dVMTBS00BtgFD15w',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
   },
   {
     id: 'aquamarines',
@@ -53,7 +57,8 @@ export const products: Product[] = [
     productId: 'prod_T8zETIjETUNFYC',
     rarity: 'Rare',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfWDFlQUtoNXRVckZtZHJQVFBYcm9aSXNw00X7JPFY4s',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
   },
   {
     id: 'sea-urchins',
@@ -64,7 +69,8 @@ export const products: Product[] = [
     productId: 'prod_T8zEUrhryeFsyI',
     rarity: 'Epic',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfSHJRUDhDVkRBbzZNeEZ2OGJFSHJkdk5Q00TeUeQ1NL',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
   },
   {
     id: 'shipwreck-treasures',
@@ -75,7 +81,8 @@ export const products: Product[] = [
     productId: 'prod_T8zFvk6Jdz8TKF',
     rarity: 'Epic',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfSVhlZlRwUVB0SXAzVjQwNXdFbUF1MDZt00P6y7y1NR',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
   },
   {
     id: 'pearls',
@@ -86,6 +93,28 @@ export const products: Product[] = [
     productId: 'prod_T8zFGM0tZXFv0v',
     rarity: 'Legendary',
     icon: 'https://files.stripe.com/links/MDB8YWNjdF8xUnlGUXczeEhMV3Y4bG1FfGZsX2xpdmVfaHd1VlhQMXcwYWdZWEdJWVpOa1FYV1c400q19J5oNK',
-    mode: 'payment'
+    mode: 'payment',
+    cryptoEnabled: true
+  }
+];
+
+export const cryptoCurrencies = [
+  {
+    id: 'eth',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    icon: '₿'
+  },
+  {
+    id: 'btc',
+    name: 'Bitcoin',
+    symbol: 'BTC',
+    icon: '₿'
+  },
+  {
+    id: 'usdc',
+    name: 'USD Coin',
+    symbol: 'USDC',
+    icon: '$'
   }
 ];

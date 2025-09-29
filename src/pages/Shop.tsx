@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Loader2, Plus } from 'lucide-react';
-import { products, Product } from '../stripe-config';
+import { ShoppingCart, Loader2, Plus, Bitcoin } from 'lucide-react';
+import { products, Product, cryptoCurrencies } from '../stripe-config';
 import { useCart } from '../contexts/CartContext';
 import Cart from '../components/Cart';
 
 const Shop: React.FC = () => {
   const [quantities, setQuantities] = useState<{[key: string]: number}>({});
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [useCrypto, setUseCrypto] = useState(false);
   const { addToCart, openCart, state, clearCart } = useCart();
 
   const getQuantityOptions = () => {
@@ -31,43 +32,12 @@ const Shop: React.FC = () => {
     openCart();
   };
 
-  const createCheckoutSession = async (lineItems: any[]) => {
+  const createCheckoutSession = async (lineItems: any[], useCryptoPayment: boolean = false) => {
     try {
       console.log('Creating checkout with items:', lineItems);
       
-      const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer sk_live_51RyFQw3xHLWv8lmEAOHH59LVElWtham2vZdh5onQjjgthirQRut6PmKzSCYxc0w0upWSbzKJyLFJ9bdmnG122siA00YourSecretKey`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          'payment_method_types[]': 'card',
-          'mode': 'payment',
-          'success_url': `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-          'cancel_url': `${window.location.origin}/shop`,
-          ...lineItems.reduce((acc, item, index) => {
-            acc[`line_items[${index}][price_data][currency]`] = 'usd';
-            acc[`line_items[${index}][price_data][product_data][name]`] = item.name;
-            acc[`line_items[${index}][price_data][product_data][description]`] = item.description;
-            acc[`line_items[${index}][price_data][unit_amount]`] = item.price * 100;
-            acc[`line_items[${index}][quantity]`] = item.quantity;
-            return acc;
-          }, {} as any)
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const session = await response.json();
-      return session;
-    } catch (error) {
-      console.error('Direct Stripe API failed, trying Supabase function:', error);
-      
-      // Fallback to Supabase function
-      const response = await fetch('/api/create-checkout', {
+      // Use the consolidated checkout endpoint
+      const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,14 +56,18 @@ const Shop: React.FC = () => {
           })),
           success_url: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${window.location.origin}/shop`,
+          use_crypto: useCryptoPayment
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Supabase function also failed');
+        throw new Error('Failed to create checkout session');
       }
 
       return await response.json();
+    } catch (error) {
+      console.error('Checkout error:', error);
+      throw error;
     }
   };
 
@@ -113,7 +87,7 @@ const Shop: React.FC = () => {
         quantity: item.quantity,
       }));
 
-      const session = await createCheckoutSession(lineItems);
+      const session = await createCheckoutSession(lineItems, useCrypto);
       
       if (session.url) {
         clearCart();
@@ -129,7 +103,7 @@ const Shop: React.FC = () => {
     }
   };
 
-  const handleDirectCheckout = async (product: Product) => {
+  const handleDirectCheckout = async (product: Product, useCryptoPayment: boolean = false) => {
     setIsCheckingOut(true);
 
     try {
@@ -142,7 +116,7 @@ const Shop: React.FC = () => {
         quantity: quantity,
       }];
 
-      const session = await createCheckoutSession(lineItems);
+      const session = await createCheckoutSession(lineItems, useCryptoPayment);
       
       if (session.url) {
         window.location.href = session.url;
@@ -187,7 +161,7 @@ const Shop: React.FC = () => {
                      product.name === 'Aquamarines' ? '💎' :
                      product.name === 'Sea Urchins' ? '🦔' :
                      product.name === 'Shipwreck Treasures' ? '⚱️' :
-                     product.name === 'Pearls' ? '🦪' : '🌊'}
+                     product.name === 'Pearls' ? '🪬' : '🌊'}
                   </div>
                   <h3 className="text-xl font-bold text-cyan-100 mb-2">{product.name}</h3>
                 </div>
@@ -228,23 +202,35 @@ const Shop: React.FC = () => {
                     <span>Add to Cart</span>
                   </button>
 
-                  <button
-                    onClick={() => handleDirectCheckout(product)}
-                    disabled={isCheckingOut}
-                    className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
-                  >
-                    {isCheckingOut ? (
-                      <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleDirectCheckout(product, false)}
+                      disabled={isCheckingOut}
+                      className="flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
+                    >
+                      {isCheckingOut ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Processing...</span>
-                      </>
-                    ) : (
-                      <>
+                      ) : (
                         <ShoppingCart className="h-4 w-4" />
-                        <span>Buy Now</span>
-                      </>
+                      )}
+                      <span>Buy Now</span>
+                    </button>
+
+                    {product.cryptoEnabled && (
+                      <button
+                        onClick={() => handleDirectCheckout(product, true)}
+                        disabled={isCheckingOut}
+                        className="flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
+                      >
+                        {isCheckingOut ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Bitcoin className="h-4 w-4" />
+                        )}
+                        <span>Pay with Crypto</span>
+                      </button>
                     )}
-                  </button>
+                  </div>
                 </div>
               </div>
             );
@@ -257,21 +243,31 @@ const Shop: React.FC = () => {
               Secure Payments
             </h3>
             <p className="text-cyan-100 mb-4">
-              Pay securely with credit card through Stripe's encrypted payment system
+              Pay securely with credit card or cryptocurrency through Stripe's encrypted payment system
             </p>
-            <div className="flex justify-center items-center space-x-4 text-amber-400">
+            <div className="flex flex-wrap justify-center items-center gap-4 text-amber-400">
               <span>Visa</span>
               <span>•</span>
               <span>Mastercard</span>
               <span>•</span>
               <span>American Express</span>
               <span>•</span>
-              <span>& more</span>
+              {cryptoCurrencies.map(crypto => (
+                <span key={crypto.id} className="flex items-center">
+                  <span className="mr-1">{crypto.symbol}</span>
+                  <span>{crypto.name}</span>
+                </span>
+              ))}
             </div>
           </div>
         </div>
         
-        <Cart onCheckout={handleCheckout} isCheckingOut={isCheckingOut} />
+        <Cart 
+          onCheckout={handleCheckout} 
+          isCheckingOut={isCheckingOut} 
+          useCrypto={useCrypto}
+          setUseCrypto={setUseCrypto}
+        />
       </div>
     </div>
   );

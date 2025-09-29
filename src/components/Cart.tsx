@@ -1,13 +1,15 @@
 import React from 'react';
-import { X, Plus, Minus, ShoppingCart, Loader2 } from 'lucide-react';
+import { X, Plus, Minus, ShoppingCart, Loader2, Bitcoin } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 
 interface CartProps {
   onCheckout: () => void;
   isCheckingOut: boolean;
+  useCrypto: boolean;
+  setUseCrypto: (value: boolean) => void;
 }
 
-const Cart: React.FC<CartProps> = ({ onCheckout, isCheckingOut }) => {
+const Cart: React.FC<CartProps> = ({ onCheckout, isCheckingOut, useCrypto, setUseCrypto }) => {
   const { state, removeFromCart, updateQuantity, closeCart, getTotalItems, getTotalPrice } = useCart();
 
   if (!state.isOpen) return null;
@@ -73,7 +75,7 @@ const Cart: React.FC<CartProps> = ({ onCheckout, isCheckingOut }) => {
                                                item.product.name === 'Aquamarines' ? '💎' :
                                                item.product.name === 'Sea Urchins' ? '🦔' :
                                                item.product.name === 'Shipwreck Treasures' ? '⚱️' :
-                                               item.product.name === 'Pearls' ? '🦪' : '🌊';
+                                               item.product.name === 'Pearls' ? '🪬' : '🌊';
                           target.parentNode?.appendChild(fallback);
                         }}
                       />
@@ -138,10 +140,41 @@ const Cart: React.FC<CartProps> = ({ onCheckout, isCheckingOut }) => {
               </span>
             </div>
             
+            {/* Payment Options */}
+            <div className="mb-4 flex items-center justify-center space-x-4">
+              <button
+                onClick={() => setUseCrypto(false)}
+                className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                  !useCrypto 
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold' 
+                    : 'bg-blue-900/30 text-cyan-300 border border-cyan-500/30'
+                }`}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span>Card</span>
+              </button>
+              
+              <button
+                onClick={() => setUseCrypto(true)}
+                className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                  useCrypto 
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold' 
+                    : 'bg-blue-900/30 text-cyan-300 border border-cyan-500/30'
+                }`}
+              >
+                <Bitcoin className="h-4 w-4" />
+                <span>Crypto</span>
+              </button>
+            </div>
+            
             <button
               onClick={onCheckout}
               disabled={isCheckingOut}
-              className="w-full flex items-center justify-center space-x-2 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
+              className={`w-full flex items-center justify-center space-x-2 py-4 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 ${
+                useCrypto 
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700' 
+                  : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
+              }`}
             >
               {isCheckingOut ? (
                 <>
@@ -150,8 +183,8 @@ const Cart: React.FC<CartProps> = ({ onCheckout, isCheckingOut }) => {
                 </>
               ) : (
                 <>
-                  <ShoppingCart className="h-5 w-5" />
-                  <span>Checkout</span>
+                  {useCrypto ? <Bitcoin className="h-5 w-5" /> : <ShoppingCart className="h-5 w-5" />}
+                  <span>Checkout {useCrypto ? 'with Crypto' : 'Now'}</span>
                 </>
               )}
             </button>

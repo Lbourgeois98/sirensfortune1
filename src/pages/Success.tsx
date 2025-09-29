@@ -1,113 +1,125 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, Package, ArrowRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 
 const Success: React.FC = () => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [paymentType, setPaymentType] = useState<'card' | 'crypto' | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (sessionId) {
-      // In a real app, you might fetch order details from your backend
-      // For now, we'll show a generic success message
-      setOrderDetails({ sessionId });
-    }
+    const fetchSessionDetails = async () => {
+      if (!sessionId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // In a real implementation, you would fetch the session details from your backend
+        // For now, we'll simulate this with a timeout
+        setTimeout(() => {
+          // This would normally come from the API
+          // For demo purposes, randomly select payment type
+          const randomPaymentType = Math.random() > 0.5 ? 'card' : 'crypto';
+          setPaymentType(randomPaymentType as 'card' | 'crypto');
+          setIsLoading(false);
+        }, 1500);
+      } catch (error) {
+        console.error('Error fetching session details:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchSessionDetails();
   }, [sessionId]);
 
-  return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="container mx-auto max-w-2xl">
-        <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-12 w-12 text-green-400" />
-          </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent mb-4">
-            Payment Successful!
-          </h1>
-          <p className="text-xl text-cyan-100">
-            Thank you for your purchase from Sirens Fortune
+  const handleReturnToShop = () => {
+    navigate('/shop');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-16 w-16 text-cyan-400 animate-spin mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-cyan-100 mb-2">Processing your payment...</h2>
+          <p className="text-cyan-300">Please wait while we confirm your transaction.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!sessionId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-gradient-to-b from-red-900/50 to-red-800/50 backdrop-blur-lg rounded-2xl border border-red-500/30 p-8 max-w-md w-full text-center">
+          <div className="text-red-400 text-6xl mb-6">⚠️</div>
+          <h2 className="text-2xl font-bold text-red-100 mb-4">Invalid Session</h2>
+          <p className="text-red-200 mb-6">
+            We couldn't find your payment information. Please return to the shop and try again.
           </p>
-        </div>
-
-        <div className="bg-gradient-to-b from-teal-800/50 to-blue-800/50 backdrop-blur-lg rounded-2xl border border-cyan-500/30 p-8 mb-8">
-          <div className="flex items-center space-x-3 mb-6">
-            <Package className="h-8 w-8 text-amber-400" />
-            <h2 className="text-2xl font-bold text-cyan-100">Order Confirmation</h2>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-cyan-500/30">
-              <span className="text-cyan-200">Order Status:</span>
-              <span className="text-green-400 font-semibold">Confirmed</span>
-            </div>
-            
-            {sessionId && (
-              <div className="flex justify-between items-center py-3 border-b border-cyan-500/30">
-                <span className="text-cyan-200">Session ID:</span>
-                <span className="text-cyan-100 font-mono text-sm">{sessionId.substring(0, 20)}...</span>
-              </div>
-            )}
-            
-            <div className="flex justify-between items-center py-3 border-b border-cyan-500/30">
-              <span className="text-cyan-200">Processing Time:</span>
-              <span className="text-cyan-100">3-7 business days</span>
-            </div>
-            
-            <div className="flex justify-between items-center py-3">
-              <span className="text-cyan-200">Delivery Method:</span>
-              <span className="text-cyan-100">Mystical Ocean Portal</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-amber-500/10 to-yellow-500/10 backdrop-blur-lg rounded-2xl border border-amber-500/30 p-8 mb-8">
-          <h3 className="text-2xl font-bold text-amber-300 mb-4">What Happens Next?</h3>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-amber-500/20 rounded-full flex items-center justify-center mt-1">
-                <span className="text-amber-400 text-sm font-bold">1</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-cyan-100">Treasure Preparation</h4>
-                <p className="text-cyan-300">Our aquatic specialists will carefully prepare your ocean treasures with proper enchantments.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-amber-500/20 rounded-full flex items-center justify-center mt-1">
-                <span className="text-amber-400 text-sm font-bold">2</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-cyan-100">Quality Assurance</h4>
-                <p className="text-cyan-300">Each treasure undergoes rigorous quality checks to ensure maximum magical potency.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-amber-500/20 rounded-full flex items-center justify-center mt-1">
-                <span className="text-amber-400 text-sm font-bold">3</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-cyan-100">Mystical Delivery</h4>
-                <p className="text-cyan-300">Your treasures will be delivered through our secure ocean portal network.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center space-y-4">
-          <Link
-            to="/shop"
-            className="inline-flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105"
+          <button
+            onClick={handleReturnToShop}
+            className="flex items-center justify-center space-x-2 py-3 px-6 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold rounded-lg transition-all duration-300 mx-auto"
           >
-            <span>Continue Shopping</span>
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+            <ArrowLeft className="h-5 w-5" />
+            <span>Return to Shop</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="bg-gradient-to-b from-emerald-900/50 to-teal-800/50 backdrop-blur-lg rounded-2xl border border-emerald-500/30 p-8 max-w-md w-full">
+        <div className="text-center">
+          <CheckCircle className="h-20 w-20 text-emerald-400 mx-auto mb-6" />
+          <h2 className="text-3xl font-bold text-emerald-100 mb-4">Payment Successful!</h2>
           
-          <div className="text-cyan-300">
-            <p>Need help? <Link to="/contact" className="text-amber-400 hover:text-amber-300">Contact our support team</Link></p>
-          </div>
+          {paymentType === 'crypto' ? (
+            <div className="mb-6">
+              <p className="text-emerald-200 mb-4">
+                Your crypto payment has been processed successfully. Your ocean treasures are on their way!
+              </p>
+              <div className="bg-emerald-800/30 rounded-lg p-4 border border-emerald-500/20">
+                <p className="text-emerald-300 text-sm">
+                  Transaction ID: {sessionId.substring(0, 8)}...{sessionId.substring(sessionId.length - 8)}
+                </p>
+                <p className="text-emerald-300 text-sm mt-2">
+                  Payment Method: Cryptocurrency
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <p className="text-emerald-200 mb-4">
+                Your payment has been processed successfully. Your ocean treasures are on their way!
+              </p>
+              <div className="bg-emerald-800/30 rounded-lg p-4 border border-emerald-500/20">
+                <p className="text-emerald-300 text-sm">
+                  Order ID: {sessionId.substring(0, 8)}...{sessionId.substring(sessionId.length - 8)}
+                </p>
+                <p className="text-emerald-300 text-sm mt-2">
+                  Payment Method: Credit Card
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <p className="text-emerald-200 mb-6">
+            We've sent a confirmation email with your order details.
+          </p>
+          
+          <button
+            onClick={handleReturnToShop}
+            className="flex items-center justify-center space-x-2 py-3 px-6 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold rounded-lg transition-all duration-300 mx-auto"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span>Return to Shop</span>
+          </button>
         </div>
       </div>
     </div>
